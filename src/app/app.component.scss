@@ -1,0 +1,18 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  flex-direction: column;
+}
+
+.progress-bar {
+  width: 50vw;
+  height: 10vh;
+  border: 1px solid rgba(30, 87, 153, 1);
+  transition: 100ms background-size ease-in-out;
+  background: linear-gradient(to right, rgba(30, 87, 153, 1) 0%, rgba(89, 148, 202, 1) 100%) no-repeat left center;
+  background-size: calc(1% * var(--percent, 0)) 100%;
+  cursor: pointer;
+}
