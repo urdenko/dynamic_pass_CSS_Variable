@@ -15,6 +15,13 @@
   background: linear-gradient(to right, rgba(30, 87, 153, 1) 0%, rgba(89, 148, 202, 1) 100%) no-repeat left center;
   background-size: calc(1% * var(--percent, 0)) 100%;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-bar::after {
+  content: var(--percentString);
 }
 
 .text {

@@ -1,6 +1,6 @@
 import { Component, DoCheck, ViewChild, ElementRef, AfterViewInit, NgZone } from '@angular/core';
 import { range, of, Subject } from 'rxjs';
-import { delay, concatMap, switchMap, tap, takeUntil, startWith, filter } from 'rxjs/operators';
+import { delay, concatMap, switchMap, tap, takeUntil, startWith, filter, map } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 
 @Component({
@@ -8,24 +8,32 @@ import { FormControl } from '@angular/forms';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements DoCheck, AfterViewInit {
+export class AppComponent implements DoCheck {
   /**
    * Direct work with host element for better performance
    */
   @ViewChild('performanceProgressBar', { static: false }) performanceProgressBar!: ElementRef;
 
-  private currentPercent = 0;
+  public currentPercent = 0;
 
   private getBack$ = new Subject<number>();
 
   public fastModeControl = new FormControl(false);
 
-  /** The source of progress percent */
+  public hurtControl = new FormControl(false);
+
+  /**
+   * The mock source of progress percent.
+   * Added a tenth of a percent for additional calculations
+   */
   public percentProgressBar$ = this.getBack$.asObservable().pipe(
     startWith(0),
-    switchMap(from => range(from, 101 - from).pipe(concatMap(val => of(val).pipe(delay(100))))),
-    tap(currentPercent => (this.currentPercent = currentPercent))
+    map(from => from * 10),
+    switchMap(from => range(from, 1000 - from).pipe(concatMap(val => of(val / 10).pipe(delay(100))))),
+    tap(currentPercent => (this.currentPercent = Number(currentPercent)))
   );
+
+  public percentString$ = this.percentProgressBar$.pipe(map(percent => `"${percent.toFixed(1)}%"`));
 
   constructor(private ngZone: NgZone) {}
 
@@ -35,10 +43,6 @@ export class AppComponent implements DoCheck, AfterViewInit {
    */
   ngDoCheck(): void {
     console.log('Change detected!');
-  }
-
-  ngAfterViewInit(): void {
-    this.subscribePercentsStreamToPerformanceProgressBar();
   }
 
   /** Drops progress by 20 steps */
@@ -52,19 +56,6 @@ export class AppComponent implements DoCheck, AfterViewInit {
 
     this.ngZone.runOutsideAngular(() => {
       this.getBack$.next(backTo);
-    });
-  }
-
-  /**
-   * Ugly but fast method for pass css variable into element
-   */
-  private subscribePercentsStreamToPerformanceProgressBar(): void {
-    this.fastModeControl.valueChanges.pipe(filter((isFastMode: boolean) => isFastMode)).subscribe(() => {
-      this.ngZone.runOutsideAngular(() => {
-        this.percentProgressBar$.pipe(takeUntil(this.fastModeControl.valueChanges)).subscribe(percent => {
-          this.performanceProgressBar.nativeElement.style.setProperty('--percent', percent);
-        });
-      });
     });
   }
 }

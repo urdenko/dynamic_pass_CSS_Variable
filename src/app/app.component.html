@@ -1,20 +1,41 @@
 <section class="text">
   <h1>Dynamic pass CSS Variable to DOM element</h1>
-  Here are two ways to pass the css variable to DOM element. Beautiful way with the help of directive. But any variable change triggers an Angular сhange check. This can critically affect performance. For example, a fast stream of new values for drawing animations. Therefore, I propose a second method of passing css variable. He is ugly, but you better know about him too. You decide which way is best for you.
-  </section>
+  Here are two ways to pass the css variable to DOM element with the help of directive. The first way is slow, because
+  every new progress value starts Angular сhange check. This can critically affect performance. For example, a fast
+  stream of new values for drawing animations. Therefore, I propose a second method of passing css variable. He is quick
+  and clear. You decide which way is best for you.
+</section>
+
+<section>
   <label>
     <input type="checkbox" [formControl]="fastModeControl" />
-    Fast mode (look in console)
+    Fast mode
   </label>
-  <section>
-    Progress bar
-    <ng-container *ngTemplateOutlet="fastModeControl.value ? performanceCode : beautyCode"></ng-container>
-  </section>
-  
-  <ng-template #beautyCode>
-    <div class="progress-bar" [cssVariable]="{ percent: percentProgressBar$ | async }" (click)="getBack()"></div>
-  </ng-template>
-  
-  <ng-template #performanceCode>
-    <div class="progress-bar" #performanceProgressBar (click)="getBack()"></div>
-  </ng-template>
+  <label>
+    <input type="checkbox" [formControl]="hurtControl" />
+    Hurt me!
+  </label>
+</section>
+
+<section>
+  Progress bar
+  <ng-container *ngTemplateOutlet="fastModeControl.value ? performanceCode : slowCode"></ng-container>
+</section>
+
+<ng-template #slowCode>
+  <div
+    class="progress-bar"
+    [cssVariable]="{ percent: percentProgressBar$ | async, percentString: percentString$ | async }"
+    (click)="getBack()"
+  ></div>
+</ng-template>
+
+<ng-template #performanceCode>
+  <div
+    class="progress-bar"
+    [cssVariable]="{ percent: percentProgressBar$, percentString: percentString$ }"
+    (click)="getBack()"
+  ></div>
+</ng-template>
+
+<app-child-one *ngIf="hurtControl.value"></app-child-one>
